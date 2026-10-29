@@ -1,0 +1,383 @@
+
+:root {
+  --navy:       #16294a;
+  --navy-deep:  #0f1d36;
+  --on-navy:    #e3e9f2;
+  --on-navy-dim:#93a5c1;
+  --on-navy-rule: rgba(255, 255, 255, 0.16);
+
+  --ink:        #14171c;
+  --ink-soft:   #3b414a;
+  --muted:      #737a83;
+  --rule:       #dde1e7;
+
+  --sidebar-w:  64mm;
+
+  --fs-name:    17pt;
+  --fs-title:   9.6pt;
+  --fs-body:    9.7pt;
+  --fs-small:   8.4pt;
+  --fs-side:    8.6pt;
+  --fs-label:   8pt;
+
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, "Helvetica Neue",
+          Arial, "Noto Sans", sans-serif;
+
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  /* full-bleed navy band, repeats on every page */
+  background: linear-gradient(to right,
+              var(--navy) 0 var(--sidebar-w),
+              #fff var(--sidebar-w) 100%);
+}
+
+body {
+  margin: 0;
+  background: transparent;
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  line-height: 1.45;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+@page {
+  size: A4;
+  margin: 13mm 0;   /* horizontal margin lives in the columns */
+}
+
+.sheet {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  align-items: start;
+}
+
+/* ==========================================================================
+   Sidebar
+   ========================================================================== */
+
+.sidebar {
+  padding: 7mm 7mm 0 8mm;
+  color: var(--on-navy);
+}
+
+.photo {
+  display: block;
+  width: 36mm;
+  height: 36mm;
+  object-fit: cover;
+  object-position: center 34%;
+  border-radius: 50%;
+  margin: 0 auto 6mm;
+}
+
+.name {
+  margin: 0;
+  font-size: var(--fs-name);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+
+.title {
+  margin: 2mm 0 0;
+  font-size: var(--fs-title);
+  font-weight: 400;
+  color: var(--on-navy-dim);
+}
+
+/* --- location ------------------------------------------------------------ */
+
+.location {
+  display: flex;
+  align-items: flex-start;
+  gap: 2.2mm;
+  margin: 3mm 0 0;
+  font-size: 8.2pt;
+  line-height: 1.4;
+  color: var(--on-navy);
+}
+
+/* --- contacts ------------------------------------------------------------ */
+
+.contacts {
+  margin: 5mm 0 0;
+  padding: 5mm 0 0;
+  border-top: 0.5pt solid var(--on-navy-rule);
+  list-style: none;
+  font-size: 8.2pt;
+  line-height: 1.4;
+}
+
+.contacts li {
+  display: flex;
+  align-items: flex-start;
+  gap: 2.2mm;
+  white-space: nowrap;
+}
+
+.contacts li + li { margin-top: 2.2mm; }
+
+.contacts .icon,
+.location .icon {
+  flex: 0 0 auto;
+  width: 3.4mm;
+  height: 3.4mm;
+  margin-top: 0.35mm;
+  stroke: var(--on-navy-dim);
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.contacts .icon--fill {
+  fill: var(--on-navy-dim);
+  stroke: none;
+}
+
+.contacts a {
+  color: var(--on-navy);
+  text-decoration: none;
+}
+
+/* --- sidebar blocks ------------------------------------------------------ */
+
+.side-block {
+  margin-top: 6mm;
+  padding-top: 5mm;
+  border-top: 0.5pt solid var(--on-navy-rule);
+  break-inside: avoid;
+}
+
+.side-block__label {
+  margin: 0 0 3mm;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+.stack {
+  margin: 0;
+  font-size: 8.3pt;
+  line-height: 1.42;
+}
+
+.stack dt {
+  color: var(--on-navy-dim);
+  font-size: 7.4pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 2.6mm;
+}
+
+.stack dt:first-of-type { margin-top: 0; }
+
+.stack dd {
+  margin: 0.4mm 0 0;
+  color: var(--on-navy);
+}
+
+/* multi-word product names never split across lines */
+.stack dd .t { white-space: nowrap; }
+
+/* --- languages: compact one-liners --------------------------------------- */
+
+.langs {
+  margin: 0;
+  font-size: var(--fs-side);
+  line-height: 1.5;
+  color: var(--on-navy);
+}
+
+.langs .lvl { color: var(--on-navy-dim); }
+
+/* ==========================================================================
+   Main column
+   ========================================================================== */
+
+.main { padding: 0 15mm 0 11mm; }
+
+.about {
+  margin: 0 0 8mm;
+  color: var(--ink-soft);
+}
+
+.section__label {
+  margin: 0 0 5mm;
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--navy);
+  break-after: avoid;
+}
+
+/* --- timeline ------------------------------------------------------------ */
+
+.timeline {
+  margin: 0;
+  padding: 0 0 0 6mm;
+  list-style: none;
+  border-left: 0.6pt solid var(--rule);
+}
+
+.job {
+  position: relative;
+  padding-bottom: 6mm;
+  break-inside: avoid;
+}
+
+.job:last-child { padding-bottom: 0; }
+
+.job::before {
+  content: "";
+  position: absolute;
+  left: -7.05mm;
+  top: 1.5mm;
+  width: 2.1mm;
+  height: 2.1mm;
+  border-radius: 50%;
+  background: var(--navy);
+}
+
+.job__dates {
+  margin: 0;
+  font-size: var(--fs-label);
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.job__duration { color: #9aa1a9; }
+
+.job__company {
+  margin: 1.4mm 0 0;
+  font-size: 10.4pt;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* a company slot that is a live project URL rather than a name */
+.job__company a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 0.5pt solid rgba(22, 41, 74, 0.35);
+}
+
+.job__industry {
+  font-weight: 400;
+  font-size: var(--fs-small);
+  color: var(--muted);
+  margin-left: 1.8mm;
+}
+
+.job__role {
+  margin: 0.6mm 0 0;
+  color: var(--navy);
+}
+
+.job__bullets {
+  margin: 2.6mm 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.job__bullets .label {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.job__bullets li {
+  position: relative;
+  padding-left: 4.2mm;
+  margin-bottom: 1.3mm;
+}
+
+.job__bullets li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  /* em-based so the dash tracks the cap-height centre of the first line
+     (half-leading + ascent − cap/2) instead of a fixed mm guess */
+  top: 0.64em;
+  width: 2.2mm;
+  height: 0.6pt;
+  background: var(--navy);
+  opacity: 0.55;
+}
+
+.job__stack {
+  margin: 2.4mm 0 0;
+  font-size: var(--fs-small);
+  color: var(--muted);
+}
+
+.job__stack .label {
+  color: var(--ink);
+  font-weight: 600;
+  margin-right: 1.2mm;
+}
+
+/* --- education (main column, after experience) --------------------------- */
+
+.section--edu { margin-top: 8mm; break-inside: avoid; }
+
+.edu {
+  display: grid;
+  grid-template-columns: 22mm 1fr;
+  column-gap: 6mm;
+  align-items: baseline;
+}
+
+.edu__year {
+  font-size: var(--fs-label);
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+
+.edu__body { margin: 0; }
+
+.edu__body strong { color: var(--ink); font-weight: 600; }
+
+.edu__note {
+  display: block;
+  font-size: var(--fs-small);
+  color: var(--muted);
+  margin-top: 0.6mm;
+}
+
+/* ==========================================================================
+   Screen preview / print
+   ========================================================================== */
+
+@media screen {
+  body { padding: 13mm 0; }
+  html {
+    background:
+      linear-gradient(to right,
+        var(--navy) 0 var(--sidebar-w),
+        #fff var(--sidebar-w) 210mm),
+      #eceef1;
+    background-repeat: no-repeat;
+    background-position: center top;
+    background-size: 210mm 100%;
+  }
+  .sheet { width: 210mm; margin: 0 auto; }
+}
+
+@media print {
+  a { color: inherit; }
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
