@@ -6,15 +6,18 @@
   const MAX_ON_SCREEN = 30;
   const SPAWN_EVERY_MS = 250;
   const LABEL_ON = "Открыть струю креатива";
-  const LABEL_OFF = "Закрыть струю креатива";
+  const LABEL_OFF = "Призакрыть струю креатива";
   const NORMAL_PHOTO = "pic.jpg";
   const CREATIVE_PHOTO = "pic.png";
+
+  // DVD logo (Wikimedia Commons, public domain), inlined so it works from file:// too.
+  const DVD_SVG = `<svg fill="currentColor" aria-hidden="true" viewBox="0 0 1058.4 465.84" xmlns="http://www.w3.org/2000/svg"><g><path d="m91.053 0-13.719 57.707 102.28 0.039063h24c65.747 0 105.91 26.44 94.746 73.4-12.147 51.133-69.613 73.4-130.67 73.4h-22.947l29.787-125.45h-102.27l-43.521 183.2h145.05c109.07 0 212.76-57.573 231.01-131.15 3.3467-13.507 2.8806-47.253-5.3594-67.359-0.21299-0.787-0.42594-1.4-1.1855-3-0.293-0.653-0.56012-3.6412 1.1465-4.2812 0.947-0.36 2.7069 1.4944 2.9336 2.041 0.853 2.24 1.5059 3.9062 1.5059 3.9062l92.293 260.6 234.97-265.21 99.535-0.089844h24c65.76 0 106.25 26.44 95.092 73.4-12.147 51.133-69.947 73.4-131 73.4h-22.959l29.799-125.47h-102.27l-43.533 183.21h145.07c109.05 0 213.48-57.4 231-131.15 17.52-73.75-59.107-131.15-168.69-131.15h-216.4s-57.319 67.88-67.959 80.693c-57.12 68.787-67.241 87.226-68.961 91.986 0.24-4.8-1.8138-23.412-26.174-92.959-6.48-18.52-27.359-79.721-27.359-79.721h-389.25zm408.77 324.16c-276.04 0-499.83 31.72-499.83 70.84s223.79 70.84 499.83 70.84c276.04 0 499.83-31.72 499.83-70.84s-223.79-70.84-499.83-70.84zm-18.094 48.627c63.04 0 114.13 10.573 114.13 23.613s-51.095 23.613-114.13 23.613c-63.027 0-114.13-10.573-114.13-23.613s51.106-23.613 114.13-23.613z"/><path d="m963.6 445.05-0.73242 5.1738h13.08l-5.1074 36.32h5.7207l5.1055-36.32h11.68l0.72071-5.1738h-30.467zm41.215 0-13.693 41.494h5.4785l10.215-31.76h0.1328l7.1718 31.76 16.668-31.453h0.1191v31.453h5.4805v-41.494h-5.4805l-14.906 28.107-6.4395-28.107h-4.746z" display="none"/></g></svg>`;
 
   const rand = (min, max) => min + Math.random() * (max - min);
   const cats = Array.from({ length: CAT_COUNT }, (_, i) => `cats/cat${i + 1}.png`);
 
   const CSS = `
-    @media print { .wordart, [data-cats] { display: none !important; } }
+    @media print { .wordart, .dvd-logo, [data-cats] { display: none !important; } }
 
     .wordart-bar { display: flex; justify-content: center; margin: -6mm 0 8mm; perspective: 500px; }
     .wordart {
@@ -73,6 +76,16 @@
       50%      { transform: scale(0.92, 1.12); }
       75%      { transform: scale(1.05, 0.97); }
     }
+
+    /* DVD logo that bounces around while the stream is closed; recolours on every wall hit. */
+    .wordart.away { visibility: hidden; }
+    .dvd-logo {
+      position: fixed; z-index: 10000; left: 0; top: 0;
+      width: 110px; aspect-ratio: 1058.4 / 465.84;
+      pointer-events: none; color: var(--dvd-color, #c0f);
+    }
+    .dvd-logo svg { display: block; width: 100%; height: 100%; }
+    .dvd-logo[hidden] { display: none; }
 
     @media (prefers-reduced-motion: reduce) {
       .wordart, .wordart span, .wordart:hover { animation: none; }
@@ -135,10 +148,59 @@
       "position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:9999;";
     document.body.appendChild(layer);
 
+    const logo = document.createElement("div");
+    logo.className = "dvd-logo";
+    logo.setAttribute("aria-hidden", "true");
+    logo.hidden = true;
+    logo.innerHTML = DVD_SVG;
+    document.body.appendChild(logo);
+
     let timer = null;
     let warmed = false;
+    let dvd = null; // { x, y, vx, vy, last, raf } while the logo is bouncing
 
-    button.addEventListener("click", () => {
+    // Closing the stream replaces the WordArt button with a purely decorative
+    // DVD logo bouncing around the viewport; clicks pass straight through it.
+    function startDvd() {
+      const r = button.getBoundingClientRect();
+      button.classList.add("away");
+      logo.hidden = false;
+      const speed = 220; // px per second on each axis
+      dvd = {
+        x: r.left + (r.width - logo.offsetWidth) / 2,
+        y: r.top + (r.height - logo.offsetHeight) / 2,
+        vx: Math.random() < 0.5 ? -speed : speed, vy: speed,
+        last: performance.now(), raf: 0,
+      };
+      const step = (now) => {
+        const dt = Math.min((now - dvd.last) / 1000, 0.05);
+        dvd.last = now;
+        const maxX = innerWidth - logo.offsetWidth;
+        const maxY = innerHeight - logo.offsetHeight;
+        dvd.x += dvd.vx * dt;
+        dvd.y += dvd.vy * dt;
+        let hit = false;
+        if (dvd.x <= 0 || dvd.x >= maxX) { dvd.vx = dvd.x <= 0 ? Math.abs(dvd.vx) : -Math.abs(dvd.vx); hit = true; }
+        if (dvd.y <= 0 || dvd.y >= maxY) { dvd.vy = dvd.y <= 0 ? Math.abs(dvd.vy) : -Math.abs(dvd.vy); hit = true; }
+        dvd.x = Math.max(0, Math.min(dvd.x, maxX));
+        dvd.y = Math.max(0, Math.min(dvd.y, maxY));
+        if (hit) logo.style.setProperty("--dvd-color", `hsl(${Math.floor(rand(0, 360))} 90% 55%)`);
+        logo.style.transform = `translate(${dvd.x}px, ${dvd.y}px)`;
+        dvd.raf = requestAnimationFrame(step);
+      };
+      dvd.raf = requestAnimationFrame(step);
+    }
+
+    function stopDvd() {
+      cancelAnimationFrame(dvd.raf);
+      dvd = null;
+      logo.hidden = true;
+      button.classList.remove("away");
+    }
+
+    function toggle() {
+      if (dvd) stopDvd();
+
       const on = document.documentElement.classList.toggle("creative");
       setLabel(button, on ? LABEL_OFF : LABEL_ON);
 
@@ -151,7 +213,10 @@
         if (photo) photo.src = NORMAL_PHOTO;
         clearInterval(timer);
         layer.replaceChildren();
+        startDvd();
       }
-    });
+    }
+
+    button.addEventListener("click", toggle);
   });
 })();
