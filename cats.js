@@ -40,7 +40,18 @@
     document.body.appendChild(layer);
 
     const style = document.createElement("style");
-    style.textContent = "@media print { [data-cats] { display: none !important; } }";
+    // Photo does a squash-and-stretch "press me" bounce, like an old game button.
+    style.textContent = `
+      @media print { [data-cats] { display: none !important; } }
+      @media screen {
+        .photo { animation: photo-dance 1s ease-in-out infinite; transform-origin: center bottom; }
+        @keyframes photo-dance {
+          0%, 100% { transform: scale(1, 1); }
+          25%      { transform: scale(1.12, 0.9); }
+          50%      { transform: scale(0.92, 1.12); }
+          75%      { transform: scale(1.05, 0.97); }
+        }
+      }`;
     layer.dataset.cats = "";
     document.head.appendChild(style);
 
